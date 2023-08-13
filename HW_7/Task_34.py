@@ -21,3 +21,7 @@ for i in text_list:
     res.append(count)
 ans = "Парам пам-пам" if len(set(res))==1 and res[0]!=0 else "Пам парам"
 print(ans)
+
+# words = input('Введите кричалку: ')
+# count_ = lambda x: sum([x.count(i) for i in 'ауоыиэяюёе'])
+# print('Парам пам пам' if len(set(map(count_, words.split()))) < 2 else 'Пам парам')
