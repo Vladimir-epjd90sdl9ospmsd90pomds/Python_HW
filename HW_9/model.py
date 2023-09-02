@@ -1,56 +1,75 @@
 from copy import deepcopy
 
-PATH = "Python_HW\HW_9\phone.txt"
-phone_book = {}
-original_book = {}
+class Contact:
+    def __init__(self, name: str, phone: str, comment: str):
+        self.name = name
+        self.phone = phone
+        self.comment = comment
 
-def open_file():
-    global phone_book, PATH, original_book
-    with open(PATH, 'r', encoding='UTF-8') as file:
-        data = file.readlines()
-    for i, contact in enumerate(data, 1):
-        contact = contact.strip().split(';')
-        phone_book[i] = contact
-    original_book = deepcopy(phone_book)
-    # print(phone_book)
+    def full(self):
+        return f'{self.name} {self.phone} {self.comment}'
 
-def save_file():
-    global PATH, phone_book
-    data = []
-    for contact in phone_book.values():
-        contact = ';'.join(contact)
-        data.append(contact)
-    data = '\n'.join(data)
-    with open(PATH, 'w', encoding='UTF-8') as file:
-        file.write(data)
-
-def add_contact(new_contact: list[str]):
-    global phone_book
-    c_id = max(phone_book)+1
-    phone_book[c_id] = new_contact
-
-def find_contact(word: str) -> dict[int, list[str]]:
-    global phone_book
-    result = {}
-    for c_id, contact in phone_book.items():
-        for field in contact:
-            if word.lower() in field.lower():
-                result[c_id] = contact
-            break
-    return result
-
-def edit_contact(c_id: int, new_contact: list[str]):
-    global phone_book
-    curent_contact = phone_book.get(c_id)
-    contact = []
-    for i in range(len(new_contact)):
-        if new_contact[i]:
-            contact.append(new_contact[i])
+class PhoneBook:
+    def __init__(self, phone_book: dict = None, path: str = "Python_HW\HW_9\phone.txt"):
+        self.path = path
+        if phone_book is None:
+            self.phone_book: dict[int, Contact] = {}
         else:
-            contact.append(curent_contact[i])
-    phone_book[c_id] = contact
-    return contact[0]
+            self.phone_book = phone_book
+        self.original_book = {}
 
-def delete_contact(c_id: int) -> str:
-    global phone_book
-    return phone_book.pop(c_id)[0]
+    def open_file(self):
+        with open(self.path, 'r', encoding='UTF-8') as file:
+            data = file.readlines()
+        for i, contact in enumerate(data, 1):
+            contact = contact.strip().split(';')
+            self.phone_book[i] = Contact (*contact)
+        original_book = deepcopy(self.phone_book)
+        # print(phone_book)
+
+    def save_file(self):
+        data = []
+        for contact in self.phone_book.values():
+            contact = ';'.join(contact)
+            data.append(contact)
+        data = '\n'.join(data)
+        with open(self.path, 'w', encoding='UTF-8') as file:
+            file.write(data)
+
+    def add_contact(self, new_contact: list[str]):
+        c_id = max(self.phone_book)+1
+        self.phone_book[c_id] = Contact(*new_contact)
+
+    def find_contact(self, word: str):
+        result = {}
+        for c_id, contact in self.phone_book.items():
+            if word.lower() in contact.full().lower():
+                result[c_id] = contact
+                break
+        return PhoneBook(result)
+
+    def edit_contact(self, c_id: int, new_contact: list[str]):
+        curent_contact = self.phone_book.get(c_id)
+        contact = []
+        for i in range(len(new_contact)):
+            if new_contact[i]:
+                contact.append(new_contact[i])
+            else:
+                contact.append(curent_contact[i])
+        self.phone_book[c_id] = Contact(*contact)
+        return contact[0]
+
+    def delete_contact(self, c_id: int) -> str:
+        return self.phone_book.pop(c_id)[0]
+    
+    def max_len(self, option: str) -> int:
+        result = []
+        for contact in self.phone_book.values():
+            if option == 'name':
+                item = contact.name
+            elif option == 'phone':
+                item = contact.phone
+            else:
+                item = contact.comment
+            result.append(item)
+        return len(max(result, key = len))
